@@ -7,9 +7,7 @@ import (
 	"fmt"
 	"net"
 	"net/http"
-	"os"
 	"strconv"
-	"syscall"
 	"time"
 
 	"github.com/docker/go-connections/nat"
@@ -133,13 +131,9 @@ func (ws *HTTPStrategy) WaitUntilReady(ctx context.Context, target StrategyTarge
 		resp, err := client.Do(req)
 
 		if err != nil {
-			if v, ok := err.(*net.OpError); ok {
-				if v2, ok := (v.Err).(*os.SyscallError); ok {
-					if v2.Err == syscall.ECONNREFUSED {
-						time.Sleep(100 * time.Millisecond)
-						continue
-					}
-				}
+			if isRecoverableNetError(err) {
+				time.Sleep(100 * time.Millisecond)
+				continue
 			}
 			return err
 		}
@@ -152,4 +146,9 @@ func (ws *HTTPStrategy) WaitUntilReady(ctx context.Context, target StrategyTarge
 	}
 
 	return nil
+}
+
+func isRecoverableNetError(err error) bool {
+	// there are some cases that won't recover, but that's an optimization for later.
+	return true
 }
