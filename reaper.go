@@ -4,11 +4,10 @@ import (
 	"bufio"
 	"context"
 	"fmt"
+	"github.com/pkg/errors"
 	"net"
 	"strings"
 	"time"
-
-	"github.com/pkg/errors"
 )
 
 // TestcontainerLabel is used as a base for docker labels
@@ -69,7 +68,17 @@ func NewReaper(ctx context.Context, sessionID string, provider ReaperProvider) (
 
 // Connect runs a goroutine which can be terminated by sending true into the returned channel
 func (r *Reaper) Connect() (chan bool, error) {
-	conn, err := net.DialTimeout("tcp", r.Endpoint, 10*time.Second)
+
+	var err error
+	var conn net.Conn
+	for i := 0; i < 10; i++  {
+		conn, err = net.DialTimeout("tcp", r.Endpoint, 10*time.Second)
+		if err == nil {
+			break
+		} else {
+			time.Sleep(1 * time.Second)
+		}
+	}
 	if err != nil {
 		return nil, errors.Wrap(err, "Connecting to Ryuk on "+r.Endpoint+" failed")
 	}
