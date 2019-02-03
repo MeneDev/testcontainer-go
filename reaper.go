@@ -5,6 +5,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/pkg/errors"
+	"log"
 	"net"
 	"os"
 	"strings"
@@ -70,6 +71,9 @@ func NewReaper(ctx context.Context, sessionID string, provider ReaperProvider) (
 		env["NO_PROXY"] = noProxy
 	}
 
+	log.Printf("env: %v", env)
+	log.Printf("bindMounts: %v", bindMounts)
+	
 	req := ContainerRequest{
 		Image:        ReaperDefaultImage,
 		ExposedPorts: []string{"8080"},
