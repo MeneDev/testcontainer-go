@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/pkg/errors"
 	"net"
+	"os"
 	"strings"
 	"time"
 )
@@ -36,8 +37,38 @@ func NewReaper(ctx context.Context, sessionID string, provider ReaperProvider) (
 		Provider:  provider,
 		SessionID: sessionID,
 	}
-
 	// TODO: reuse reaper if there already is one
+
+	env := make(map[string]string)
+	bindMounts := make(map[string]string)
+	dockerHost, hasDockerHost := os.LookupEnv("DOCKER_HOST")
+	dockerCertPath, hasDockerCertPath := os.LookupEnv("DOCKER_CERT_PATH")
+	dockerMachineName, hasDockerMachineName := os.LookupEnv("DOCKER_MACHINE_NAME")
+	dockerTlsVerify, hasDockerTlsVerify := os.LookupEnv("DOCKER_TLS_VERIFY")
+	noProxy, hasNoProxy := os.LookupEnv("NO_PROXY")
+
+	if !hasDockerHost {
+		bindMounts["/var/run/docker.sock"] = "/var/run/docker.sock"
+	} else {
+		env["DOCKER_HOST"] = dockerHost
+	}
+
+	if hasDockerCertPath {
+		env["DOCKER_CERT_PATH"] = dockerCertPath
+		bindMounts[dockerCertPath] = dockerCertPath
+	}
+
+	if hasDockerMachineName {
+		env["DOCKER_MACHINE_NAME"] = dockerMachineName
+	}
+
+	if hasDockerTlsVerify {
+		env["DOCKER_TLS_VERIFY"] = dockerTlsVerify
+	}
+
+	if hasNoProxy {
+		env["NO_PROXY"] = noProxy
+	}
 
 	req := ContainerRequest{
 		Image:        ReaperDefaultImage,
@@ -46,9 +77,8 @@ func NewReaper(ctx context.Context, sessionID string, provider ReaperProvider) (
 			TestcontainerLabel:             "true",
 			TestcontainerLabel + ".reaper": "true",
 		},
-		BindMounts: map[string]string{
-			"/var/run/docker.sock": "/var/run/docker.sock",
-		},
+		BindMounts: bindMounts,
+		Env: env,
 		isReaper: true,
 	}
 
