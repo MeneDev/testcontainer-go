@@ -4,7 +4,6 @@ import (
 	"context"
 	"net"
 	"os"
-	"strconv"
 	"syscall"
 	"time"
 
@@ -60,15 +59,16 @@ func (hp *HostPortStrategy) WaitUntilReady(ctx context.Context, target StrategyT
 	}
 
 	proto := port.Proto()
-	portNumber := port.Int()
-	portString := strconv.Itoa(portNumber)
+	portString := port.Port()
 
 	dialer := net.Dialer{}
 
 	address := net.JoinHostPort(ipAddress, portString)
 	for {
 		conn, err := dialer.DialContext(ctx, proto, address)
-		defer conn.Close()
+		if conn != nil {
+			conn.Close()
+		}
 		if err != nil {
 			if v, ok := err.(*net.OpError); ok {
 				if v2, ok := (v.Err).(*os.SyscallError); ok {

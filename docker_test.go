@@ -148,7 +148,6 @@ func TestContainerCreation(t *testing.T) {
 }
 
 func TestContainerCreationAndWaitForListeningPortLongEnough(t *testing.T) {
-	t.Skip("Wait needs to be fixed")
 	ctx := context.Background()
 
 	nginxPort := "80/tcp"
@@ -159,7 +158,7 @@ func TestContainerCreationAndWaitForListeningPortLongEnough(t *testing.T) {
 			ExposedPorts: []string{
 				nginxPort,
 			},
-			WaitingFor: wait.ForListeningPort("80"), // default startupTimeout is 60s
+			WaitingFor: wait.ForListeningPort(nat.Port(nginxPort)), // default startupTimeout is 60s
 		},
 		Started: true,
 	})
@@ -186,16 +185,15 @@ func TestContainerCreationAndWaitForListeningPortLongEnough(t *testing.T) {
 }
 
 func TestContainerCreationTimesOut(t *testing.T) {
-	t.Skip("Wait needs to be fixed")
 	ctx := context.Background()
 	// delayed-nginx will wait 2s before opening port
 	nginxC, err := GenericContainer(ctx, GenericContainerRequest{
 		ContainerRequest: ContainerRequest{
 			Image: "menedev/delayed-nginx:1.15.2",
 			ExposedPorts: []string{
-				"80/tcp",
+				"81/tcp",
 			},
-			WaitingFor: wait.ForListeningPort("80").WithStartupTimeout(1 * time.Second),
+			WaitingFor: wait.ForListeningPort("81/tcp").WithStartupTimeout(1 * time.Second),
 		},
 		Started: true,
 	})
@@ -209,7 +207,6 @@ func TestContainerCreationTimesOut(t *testing.T) {
 }
 
 func TestContainerRespondsWithHttp200ForIndex(t *testing.T) {
-	t.Skip("Wait needs to be fixed")
 	ctx := context.Background()
 
 	nginxPort := "80/tcp"
@@ -248,7 +245,6 @@ func TestContainerRespondsWithHttp200ForIndex(t *testing.T) {
 }
 
 func TestContainerRespondsWithHttp404ForNonExistingPage(t *testing.T) {
-	t.Skip("Wait needs to be fixed")
 	ctx := context.Background()
 
 	nginxPort := "80/tcp"
@@ -303,7 +299,6 @@ func TestContainerRespondsWithHttp404ForNonExistingPage(t *testing.T) {
 }
 
 func TestContainerCreationTimesOutWithHttp(t *testing.T) {
-	t.Skip("Wait needs to be fixed")
 	ctx := context.Background()
 	// delayed-nginx will wait 2s before opening port
 	nginxC, err := GenericContainer(ctx, GenericContainerRequest{
