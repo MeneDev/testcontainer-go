@@ -142,7 +142,7 @@ func (c *DockerContainer) Start(ctx context.Context) error {
 	return nil
 }
 
-// Terminate is used to kill the container. It is usally triggered by as defer function.
+// Terminate is used to kill the container. It is usually triggered by as defer function.
 func (c *DockerContainer) Terminate(_ context.Context) error {
 	if c.terminationSignal != nil {
 		c.terminationSignal <- true
