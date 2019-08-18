@@ -7,9 +7,7 @@ import (
 	"fmt"
 	"net"
 	"net/http"
-	"os"
 	"strconv"
-	"syscall"
 	"time"
 
 	"github.com/docker/go-connections/nat"
@@ -80,7 +78,6 @@ func (ws *HTTPStrategy) WithAllowInsecure(allowInsecure bool) *HTTPStrategy {
 func ForHTTP(path string) *HTTPStrategy {
 	return NewHTTPStrategy(path)
 }
-
 // WaitUntilReady implements Strategy.WaitUntilReady
 func (ws *HTTPStrategy) WaitUntilReady(ctx context.Context, target StrategyTarget) (err error) {
 	// limit context to startupTimeout
@@ -133,15 +130,8 @@ func (ws *HTTPStrategy) WaitUntilReady(ctx context.Context, target StrategyTarge
 		resp, err := client.Do(req)
 
 		if err != nil {
-			if v, ok := err.(*net.OpError); ok {
-				if v2, ok := (v.Err).(*os.SyscallError); ok {
-					if v2.Err == syscall.ECONNREFUSED {
-						time.Sleep(100 * time.Millisecond)
-						continue
-					}
-				}
-			}
-			return err
+			time.Sleep(100 * time.Millisecond)
+			continue
 		}
 
 		if !ws.StatusCodeMatcher(resp.StatusCode) {
