@@ -129,14 +129,18 @@ func (ws *HTTPStrategy) WaitUntilReady(ctx context.Context, target StrategyTarge
 
 Retry:
 	for {
+		fmt.Printf("ctx.Err: %v \n", ctx.Err())
 		select {
 		case <-ctx.Done():
+			fmt.Printf("ctx.Err: %v \n", ctx.Err())
 			fmt.Printf("FAILED waiting, RESP")
 			break Retry
 		default:
 			resp, err := client.Do(req)
 			if err != nil || !ws.StatusCodeMatcher(resp.StatusCode) {
+				fmt.Printf("ctx.Err before sleep: %v \n", ctx.Err())
 				time.Sleep(100 * time.Millisecond)
+				fmt.Printf("ctx.Err after sleep: %v \n", ctx.Err())
 				fmt.Printf("not there yet, RESP: %v", resp)
 				continue
 			}
