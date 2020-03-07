@@ -131,14 +131,16 @@ Retry:
 	for {
 		select {
 		case <-ctx.Done():
+			fmt.Printf("FAILED waiting, RESP")
 			break Retry
 		default:
 			resp, err := client.Do(req)
 			if err != nil || !ws.StatusCodeMatcher(resp.StatusCode) {
 				time.Sleep(100 * time.Millisecond)
+				fmt.Printf("not there yet, RESP: %v", resp)
 				continue
 			}
-
+			fmt.Printf("done waiting, RESP: %v", resp)
 			break Retry
 		}
 	}
