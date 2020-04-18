@@ -139,6 +139,8 @@ Retry:
 		default:
 			resp, err := client.Do(req)
 			if err != nil || !ws.StatusCodeMatcher(resp.StatusCode) {
+				log.Printf("err: %v \n", err)
+				log.Printf("resp: %v \n", resp)
 				log.Printf("ctx.Err before sleep: %v \n", ctx.Err())
 				time.Sleep(100 * time.Millisecond)
 				log.Printf("ctx.Err after sleep: %v \n", ctx.Err())
