@@ -8,6 +8,8 @@ import (
 	"log"
 	"net"
 	"net/http"
+	"os"
+	"os/exec"
 	"strconv"
 	"time"
 
@@ -139,6 +141,14 @@ Retry:
 		default:
 			resp, err := client.Do(req)
 			if err != nil || !ws.StatusCodeMatcher(resp.StatusCode) {
+				cmd := exec.Command("ls", "-lah")
+				cmd.Stdout = os.Stdout
+				cmd.Stderr = os.Stderr
+				err := cmd.Run()
+				if err != nil {
+					log.Fatalf("cmd.Run() failed with %s\n", err)
+				}
+
 				log.Printf("err: %v \n", err)
 				log.Printf("resp: %v \n", resp)
 				log.Printf("ctx.Err before sleep: %v \n", ctx.Err())
