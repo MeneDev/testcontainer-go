@@ -115,6 +115,7 @@ func (ws *HTTPStrategy) WaitUntilReady(ctx context.Context, target StrategyTarge
 	}
 
 	url := fmt.Sprintf("%s://%s%s", proto, address, ws.Path)
+	log.Printf("URL %v \n", url)
 
 	tripper := http.DefaultTransport
 
@@ -141,6 +142,9 @@ Retry:
 		default:
 			resp, err := client.Do(req)
 			if err != nil || !ws.StatusCodeMatcher(resp.StatusCode) {
+				log.Printf("err: %v \n", err)
+				log.Printf("resp: %v \n", resp)
+
 				cmd := exec.Command("docker", "ps")
 				cmd.Stdout = os.Stdout
 				cmd.Stderr = os.Stderr
@@ -149,8 +153,6 @@ Retry:
 					log.Fatalf("cmd.Run() failed with %s\n", err)
 				}
 
-				log.Printf("err: %v \n", err)
-				log.Printf("resp: %v \n", resp)
 				log.Printf("ctx.Err before sleep: %v \n", ctx.Err())
 				time.Sleep(100 * time.Millisecond)
 				log.Printf("ctx.Err after sleep: %v \n", ctx.Err())
