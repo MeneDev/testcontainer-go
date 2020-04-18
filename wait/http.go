@@ -141,7 +141,7 @@ Retry:
 		default:
 			resp, err := client.Do(req)
 			if err != nil || !ws.StatusCodeMatcher(resp.StatusCode) {
-				cmd := exec.Command("ls", "-lah")
+				cmd := exec.Command("docker", "ps")
 				cmd.Stdout = os.Stdout
 				cmd.Stderr = os.Stderr
 				err := cmd.Run()
